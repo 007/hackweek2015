@@ -8,4 +8,7 @@ SELECT DISTINCT CONCAT('http://ak1.polyvoreimg.com/cgi/img-thing/size/l/tid/', t
 
 fetch images for testing:
 
+mkdir input_sources
+cd input_sources
+cat ../thing_sources.txt | xargs -I{} -P4 curl -O "{}"
 
