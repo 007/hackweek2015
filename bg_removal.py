@@ -70,8 +70,10 @@ def show_orig(fig, fn):
 
 
 # __main__
+fig_count = 3
 for fn in iglob('input_samples/*.jpg'):
-    fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(18,6))
+
+    fig, (ax0, ax1, ax2) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
 
     image = show_orig(ax0, fn)
 
