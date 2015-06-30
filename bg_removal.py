@@ -36,10 +36,10 @@ def fig_label_segments(fig, image, segments, label):
     fig.imshow(image_label_overlay)
 
 
-def show_entropy(fig, image, scale):
+def show_entropy(fig, image):
     img1 = img_as_float(image)
     img1 = sobel_each(img1)
-    img1 = img1 * scale
+    img1 = img1 * 0.15
     img1 = img_as_ubyte(img1)
     img1 = opening_each(img1, disk(2))
     img1 = rgb2gray(img1)
@@ -48,7 +48,8 @@ def show_entropy(fig, image, scale):
     output = binary_closing(output, disk(9))
     output = ndimage.morphology.binary_fill_holes(output)
     output = binary_opening(output, disk(3))
-    fig_label_segments(fig, image, output, 'sobel s=' + str(scale))
+    #fig_label_segments(fig, image, output, 'sobel s=' + str(scale))
+    fig_label_segments(fig, image, output, 'masked')
 
 
 def get_input_image(fname):
@@ -77,7 +78,7 @@ for fn in iglob('input_samples/*.jpg'):
 
     fig, (ax0, ax1) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
     image = show_orig(ax0, fn)
-    show_entropy(ax1, image, 0.15)
+    show_entropy(ax1, image)
 
     print("Saving %s to filename %s" % (fn, outname))
     plt.savefig(outname)
