@@ -70,18 +70,15 @@ def show_orig(fig, fn):
 
 
 # __main__
-fig_count = 3
+fig_count = 2
 for fn in iglob('input_samples/*.jpg'):
-
-    fig, (ax0, ax1, ax2) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
-
-    image = show_orig(ax0, fn)
-
-    show_entropy(ax1, image, 0.15)
-    show_entropy(ax2, image, 0.125)
-
     nr = re.compile('input_samples/(\d+).jpg')
     outname = nr.sub(r'output_samples/\1.png', fn)
+
+    fig, (ax0, ax1) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
+    image = show_orig(ax0, fn)
+    show_entropy(ax1, image, 0.15)
+
     print("Saving %s to filename %s" % (fn, outname))
     plt.savefig(outname)
     plt.close()
