@@ -153,7 +153,7 @@ for fn in iglob('input_samples/*.jpg'):
 #    fn = 'input_samples/76969215.jpg'
     image = show_orig(ax0, fn)
 
-    show_entropy(ax1, image, 0.2)
+    show_entropy(ax1, image, 0.15)
     show_entropy(ax2, image, 0.1)
 
     nr = re.compile('input_samples/(\d+).jpg')
