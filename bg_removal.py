@@ -63,7 +63,7 @@ def show_entropy(fig, image, scale):
     #highpass = img1 - blurred
 #    output = equalize_each_rgb(img1)
 #    output = ndimage.morphology.binary_fill_holes(output)
-    fig_label_segments(fig, output, img1, 'sobel')
+    fig_label_segments(fig, output, img1, 'sobel s=' + str(scale))
 
 
 def segment_quick(fig, image):
@@ -148,6 +148,7 @@ def segment_km(fig, image):
     fig_label_segments(fig, image, segmented, 'kmeans')
 
 
+
 fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(18,6))
 
 image = show_orig(ax0)
@@ -161,4 +162,5 @@ show_entropy(ax1, image, 0.2)
 show_entropy(ax2, image, 0.1)
 #segment_slic(ax2, image)
 
+plt.savefig("output_sample.png")
 plt.show()
