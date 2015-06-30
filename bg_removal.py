@@ -7,10 +7,11 @@ from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
 from skimage.filters import sobel, sobel_v, gaussian_filter, threshold_adaptive
 from skimage.exposure import equalize_hist, equalize_adapthist, rescale_intensity
 from skimage.transform import rescale
-from skimage.morphology import disk, opening, skeletonize, binary_closing
+from skimage.morphology import disk, opening, skeletonize, binary_closing, binary_opening
 from skimage.color import label2rgb, rgb2gray
 from skimage.segmentation import felzenszwalb, slic, quickshift, mark_boundaries, relabel_sequential, clear_border
 from matplotlib import pyplot as plt
+from matplotlib.colors import hex2color
 
 # adapt single-channel filter to multi-channel mode
 @adapt_rgb(each_channel)
@@ -38,7 +39,7 @@ def skeletonize_each(image):
 def fig_label_segments(fig, image, segments, label):
 #    labels, _ = ndimage.label(segments)
 #    image_label_overlay=label2rgb(labels, image=image)
-    image_label_overlay=label2rgb(segments, image=image)
+    image_label_overlay=label2rgb(segments, image=image, colors=(hex2color('#000000'), hex2color('#ff0000')))
 #    image_label_overlay=mark_boundaries(image, segments)
 #    image_label_overlay = image
 
@@ -51,8 +52,8 @@ def fig_label_segments(fig, image, segments, label):
 def show_entropy(fig, image, scale):
     blur_size = 3  # Standard deviation in pixels.
 
-    img1 = sobel_each(image)
-    img1 = img_as_float(img1)
+    img1 = img_as_float(image)
+    img1 = sobel_each(img1)
     img1 = img1 * scale
     img1 = img_as_ubyte(img1)
     img1 = opening_each(img1, disk(2))
@@ -61,6 +62,7 @@ def show_entropy(fig, image, scale):
     output = ndimage.morphology.binary_fill_holes(output)
     output = binary_closing(output, disk(9))
     output = ndimage.morphology.binary_fill_holes(output)
+    output = binary_opening(output, disk(3))
     fig_label_segments(fig, image, output, 'sobel s=' + str(scale))
 
 
@@ -92,6 +94,7 @@ def get_input_image(fname):
     input_image = rescale(input_image, 2)
 
     return input_image
+
 
 def show_orig(fig, fn):
     #image = get_input_image('input_samples/27845089.jpg')
@@ -150,11 +153,10 @@ def segment_km(fig, image):
 for fn in iglob('input_samples/*.jpg'):
     fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(18,6))
 
-#    fn = 'input_samples/76969215.jpg'
     image = show_orig(ax0, fn)
 
     show_entropy(ax1, image, 0.15)
-    show_entropy(ax2, image, 0.1)
+    show_entropy(ax2, image, 0.125)
 
     nr = re.compile('input_samples/(\d+).jpg')
     outname = nr.sub(r'output_samples/\1.png', fn)
