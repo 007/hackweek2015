@@ -1,4 +1,6 @@
 import numpy as np
+import re
+from glob import iglob
 from scipy import ndimage
 from skimage import io as img_io, img_as_float, img_as_ubyte
 from skimage.color.adapt_rgb import adapt_rgb, each_channel, hsv_value
@@ -36,8 +38,10 @@ def skeletonize_each(image):
 def fig_label_segments(fig, image, segments, label):
 #    labels, _ = ndimage.label(segments)
 #    image_label_overlay=label2rgb(labels, image=image)
+    image_label_overlay=label2rgb(segments, image=image)
 #    image_label_overlay=mark_boundaries(image, segments)
-    image_label_overlay = image
+#    image_label_overlay = image
+
     fig.set_title(label)
     fig.axis('off')
     fig.imshow(image_label_overlay)
@@ -57,13 +61,7 @@ def show_entropy(fig, image, scale):
     output = ndimage.morphology.binary_fill_holes(output)
     output = binary_closing(output, disk(9))
     output = ndimage.morphology.binary_fill_holes(output)
-#    output = skeletonize(img1)
-    #img1 = img_as_float(img1)
-    #blurred = gaussian_filter(image, blur_size)
-    #highpass = img1 - blurred
-#    output = equalize_each_rgb(img1)
-#    output = ndimage.morphology.binary_fill_holes(output)
-    fig_label_segments(fig, output, img1, 'sobel s=' + str(scale))
+    fig_label_segments(fig, image, output, 'sobel s=' + str(scale))
 
 
 def segment_quick(fig, image):
@@ -95,9 +93,9 @@ def get_input_image(fname):
 
     return input_image
 
-def show_orig(fig):
+def show_orig(fig, fn):
     #image = get_input_image('input_samples/27845089.jpg')
-    image = get_input_image('input_samples/76969215.jpg')
+    image = get_input_image(fn)
     fig.set_title('original')
     fig.axis('off')
     fig.imshow(image)
@@ -149,18 +147,19 @@ def segment_km(fig, image):
 
 
 
-fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(18,6))
+for fn in iglob('input_samples/*.jpg'):
+    fig, (ax0, ax1, ax2) = plt.subplots(1, 3, figsize=(18,6))
 
-image = show_orig(ax0)
+#    fn = 'input_samples/76969215.jpg'
+    image = show_orig(ax0, fn)
 
-#segment_km(ax1, image)
+    show_entropy(ax1, image, 0.2)
+    show_entropy(ax2, image, 0.1)
 
+    nr = re.compile('input_samples/(\d+).jpg')
+    outname = nr.sub(r'output_samples/\1.png', fn)
+    print("Saving %s to filename %s" % (fn, outname))
+    plt.savefig(outname)
+    plt.close()
 
-
-#segment_fz(ax1, image)
-show_entropy(ax1, image, 0.2)
-show_entropy(ax2, image, 0.1)
-#segment_slic(ax2, image)
-
-plt.savefig("output_sample.png")
 plt.show()
