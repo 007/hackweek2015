@@ -4,11 +4,16 @@ SELECT DISTINCT thing_id FROM lookbook_thing WHERE lookbook_id IN(2574093, 25740
 
 
 turn thing IDs into image URLs:
-SELECT DISTINCT CONCAT('http://ak1.polyvoreimg.com/cgi/img-thing/size/l/tid/', thing_id, '.jpg') FROM lookbook_thing WHERE lookbook_id IN(2574093, 2574081, 4347652) ORDER BY thing_id;
+SELECT thing_id  FROM lookbook_thing WHERE lookbook_id IN(2574093, 2574081, 4347652) ORDER BY thing_id;
 
 fetch images for testing:
 
 mkdir input_sources
-cd input_sources
-cat ../thing_sources.txt | xargs -I{} -P4 curl -O "{}"
+pushd input_sources
+cat ../thing_sources.txt | xargs -I{} -P4 curl -O http://ak1.polyvoreimg.com/cgi/img-thing/size/l/tid/{}.jpg
+popd
 
+mkdir input_masks
+pushd input_masks
+cat ../thing_sources.txt | xargs -I{} -P4 curl -O http://ak1.polyvoreimg.com/cgi/img-thing/mask/1/size/l/tid/{}.jpg
+popd

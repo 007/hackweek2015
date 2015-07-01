@@ -30,13 +30,19 @@ def opening_each(image, conv):
 
 def fig_label_segments(fig, image, segments, label):
     print ("%s number of segments: %d" % (label, len(np.unique(segments))))
-    image_label_overlay=label2rgb(segments, image=image, colors=(hex2color('#000000'), hex2color('#ff0000')))
+    image_label_overlay = label2rgb(segments, colors=(hex2color('#000000'), hex2color('#ffffff')), alpha=1)
+    image = img_as_ubyte(image)
+    image = ~image
+    image_label_overlay = image_label_overlay.astype(np.bool_)
+    image_label_overlay = image * image_label_overlay
+    image_label_overlay = ~img_as_ubyte(image_label_overlay)
     fig.set_title(label)
     fig.axis('off')
     fig.imshow(image_label_overlay)
 
 
 def show_entropy(fig, image):
+    image = ndimage.median_filter(image, 3)
     img1 = img_as_float(image)
     img1 = sobel_each(img1)
     img1 = img1 * 0.15
@@ -48,37 +54,41 @@ def show_entropy(fig, image):
     output = binary_closing(output, disk(9))
     output = ndimage.morphology.binary_fill_holes(output)
     output = binary_opening(output, disk(3))
-    #fig_label_segments(fig, image, output, 'sobel s=' + str(scale))
-    fig_label_segments(fig, image, output, 'masked')
+    fig_label_segments(fig, image, output, 'new mask')
 
 
 def get_input_image(fname):
     # read image without downsampling
     input_image = img_io.imread(fname)
-    input_image = ndimage.median_filter(input_image, 3)
     # scale image up by 2x for better visualization
     input_image = rescale(input_image, 2)
     return input_image
 
 
 def show_orig(fig, fn):
-    #image = get_input_image('input_samples/27845089.jpg')
     image = get_input_image(fn)
     fig.set_title('original')
     fig.axis('off')
     fig.imshow(image)
     return image
 
+def load_mask(fig, fn):
+    image = get_input_image(fn)
+    fig.set_title('old mask')
+    fig.axis('off')
+    fig.imshow(image)
 
 # __main__
-fig_count = 2
+fig_count = 3
 for fn in iglob('input_samples/*.jpg'):
     nr = re.compile('input_samples/(\d+).jpg')
+    mask_fn = nr.sub(r'input_masks/\1.jpg', fn)
     outname = nr.sub(r'output_samples/\1.png', fn)
 
-    fig, (ax0, ax1) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
+    fig, (ax0, ax1, ax2) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
     image = show_orig(ax0, fn)
-    show_entropy(ax1, image)
+    load_mask(ax1, mask_fn)
+    show_entropy(ax2, image)
 
     print("Saving %s to filename %s" % (fn, outname))
     plt.savefig(outname)
