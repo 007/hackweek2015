@@ -80,12 +80,13 @@ def load_mask(fig, fn):
 
 # __main__
 fig_count = 3
+fig_scale_factor = 3
 for fn in iglob('input_samples/*.jpg'):
     nr = re.compile('input_samples/(\d+).jpg')
     mask_fn = nr.sub(r'input_masks/\1.jpg', fn)
     outname = nr.sub(r'output_samples/\1.png', fn)
 
-    fig, (ax0, ax1, ax2) = plt.subplots(1, fig_count, figsize=(fig_count * 6, 6))
+    fig, (ax0, ax1, ax2) = plt.subplots(1, fig_count, figsize=(fig_count * fig_scale_factor, fig_scale_factor))
     image = show_orig(ax0, fn)
     load_mask(ax1, mask_fn)
     show_entropy(ax2, image)
