@@ -1,0 +1,57 @@
+#!/usr/bin/env montage-perl
+
+use strict;
+use Data::Dumper;
+use File::Slurp qw(read_file);
+use Image::Magick;
+
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+
+use Montage::ImageUtil
+
+sub image_to_colors {
+    my ($image_name) = @_;
+
+    my $text = read_file($image_name) ;
+
+    my $image = Image::Magick->new();
+    if (my $err = $image->BlobToImage($image_data) or not $image->Get('width')) {
+        if ($err) {
+            $err = "  ($err)";
+        }
+        die "Image is not in a recognized format: $url$err";
+    }
+
+    if ($image->Get('Colorspace') ne 'RGB') {
+        # CMYK causes our code to seg fault (e.g. the Blur calls in mask_image) so we convert to RGB.
+        # Note that some colors may change b/c imagemagick will try to map the CMYK to the closest RGB color.
+        $image->Set(colorspace => 'RGB');
+    }
+
+    # blatantly copied from lib/Montage/Instance.pm:set_color_tags
+    if ($image->Get('width') > $Montage::Cons::MIN_SIZE_TO_COLOR_TAG &&
+                   $image->Get('height') > $Montage::Cons::MIN_SIZE_TO_COLOR_TAG) {
+
+        # focus on center for things
+        my $colors = Montage::ImageUtil::extract_main_colors($image, 5, 1);
+        my $high_tags = []; # colors with strength >= 4 %
+        my $low_tags = []; # colors with strength 1, 2, 3 %
+
+        for my $color (@$colors) {
+            if ($color->{percent} >= 4) {
+                push @$high_tags, { value => $color->{snap_rgb}, strength => $color->{percent} };
+            } elsif ($color->{percent} >= 1) {
+                push @$low_tags, { value => $color->{snap_rgb}, strength => $color->{percent} };
+            } else { last; }
+        }
+
+        if (@$high_tags) {
+            return $high_tags;
+        } else {
+            return $low_tags;
+        }
+
+    }
+    return;
+}
