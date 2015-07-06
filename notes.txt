@@ -17,3 +17,15 @@ mkdir input_masks
 pushd input_masks
 cat ../thing_sources.txt | xargs -I{} -P4 curl -O http://ak1.polyvoreimg.com/cgi/img-thing/mask/1/size/l/tid/{}.jpg
 popd
+
+
+
+results:
+  59 better
+  55 par
+  17 other
+  16 worse
+
+other are either hard-to-categorize for either algorithm, or some other oddity:
+ - better focus on item, to the detriment of the overall picture
+ - equally bad masking on both algorithms
